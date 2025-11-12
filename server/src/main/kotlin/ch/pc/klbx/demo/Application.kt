@@ -17,34 +17,6 @@ import kotlinx.io.files.SystemFileSystem
 import kotlinx.serialization.json.Json
 import kotlin.system.exitProcess
 
-@com.joelromanpr.commandline.ktx.annotations.Application(
-    name = "KLbx server",
-    description = "Runs a KLbx server, provides all functionality of the loanboox platform",
-)
-data class ProgramOptions(
-    @Option(
-        longName = "env",
-        helpText = "the environment this instance runs in. dev|prod",
-        default = "dev",
-        required = false
-    ) var env: String? = null,
-
-    @Option(
-        longName = "host",
-        shortName = 'h',
-        helpText = "the interface to bind to. Defaults to all interfaces",
-        default = "0.0.0.0",
-    )
-    val host: String = "0.0.0.0",
-    @Option(
-        longName = "port",
-        shortName = 'p',
-        helpText = "the port to bind to. Defaults to 8080",
-        default = "8079",
-    )
-    val port: Int = 8079,
-)
-
 
 fun main(args: Array<String>) {
 
@@ -74,23 +46,6 @@ fun main(args: Array<String>) {
     }.start(wait = true)
 }
 
-
-private fun parseParams(args: Array<String>): ProgramOptions {
-    val parser = Parser()
-    return when (val result = parser.parseArguments<ProgramOptions>(args)) {
-        is ParserResult.Parsed -> {
-            result.value
-        }
-
-        is ParserResult.NotParsed -> {
-            // Errors are collected for you
-            result.errors.forEach { println("Error: ${it.message}") }
-            println("\n" + parser.generateHelpText<ProgramOptions>())
-            exitProcess(1)
-        }
-    }
-}
-
 fun Application.module() {
     install(ContentNegotiation) {
         json(Json {
@@ -110,6 +65,51 @@ fun Application.module() {
                 val text = call.receiveText()
                 call.respondText(text)
             }
+        }
+    }
+}
+
+
+@com.joelromanpr.commandline.ktx.annotations.Application(
+    name = "KLbx server",
+    description = "Runs a KLbx server, provides all functionality of the loanboox platform",
+)
+data class ProgramOptions(
+    @Option(
+        longName = "env",
+        helpText = "the environment this instance runs in. dev|prod",
+        default = "dev",
+        required = false
+    ) var env: String? = null,
+
+    @Option(
+        longName = "host",
+        shortName = 'h',
+        helpText = "the interface to bind to. Defaults to all interfaces",
+        default = "0.0.0.0",
+    )
+    val host: String = "0.0.0.0",
+    @Option(
+        longName = "port",
+        shortName = 'p',
+        helpText = "the port to bind to. Defaults to 8080",
+        default = "8079",
+    )
+    val port: Int = 8079,
+)
+
+private fun parseParams(args: Array<String>): ProgramOptions {
+    val parser = Parser()
+    return when (val result = parser.parseArguments<ProgramOptions>(args)) {
+        is ParserResult.Parsed -> {
+            result.value
+        }
+
+        is ParserResult.NotParsed -> {
+            // Errors are collected for you
+            result.errors.forEach { println("Error: ${it.message}") }
+            println("\n" + parser.generateHelpText<ProgramOptions>())
+            exitProcess(1)
         }
     }
 }
