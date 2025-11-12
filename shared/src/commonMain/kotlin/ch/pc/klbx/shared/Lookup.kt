@@ -1,8 +1,4 @@
-package ch.pc.klbx
-
-interface Displayable {
-    val name: String
-}
+package ch.pc.klbx.shared
 
 data class Lookup<T>(
     val id: String,
