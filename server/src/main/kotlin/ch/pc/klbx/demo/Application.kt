@@ -32,7 +32,7 @@ fun main(args: Array<String>) {
         )
     }
     val config = serverConfig(env) {
-        this.developmentMode = params.env != "dev"
+        this.developmentMode = params.env != "prod"
         this.watchPaths = listOf(SystemFileSystem.resolve(Path(".")).toString())
         module(Application::module)
     }
@@ -47,6 +47,14 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
+    installErrorHandling()
+    intercept(ApplicationCallPipeline.Call) {
+        try {
+            this.proceed()
+        } catch (exception: HttpStatusException) {
+            call.respond( exception.statusCode, exception.message)
+        }
+    }
     install(ContentNegotiation) {
         json(Json {
             prettyPrint = true
@@ -54,9 +62,7 @@ fun Application.module() {
         })
     }
     val auth = installAuthentication()
-
     routing {
-
         get("/") {
             call.respondText("Ktor: ${Greeting().greet()}")
         }

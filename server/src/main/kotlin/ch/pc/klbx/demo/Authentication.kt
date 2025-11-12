@@ -16,6 +16,8 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
+import io.ktor.util.logging.KtorSimpleLogger
+import io.ktor.util.logging.Logger
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -27,6 +29,7 @@ import kotlin.time.toJavaInstant
 
 
 private val jwtAuth = "jwtAuth"
+private val  LOGGER = KtorSimpleLogger("ch.pc.klbx.demo.Authentication")
 
 @Serializable
 data class Token(
@@ -88,7 +91,7 @@ fun Application.installAuthentication(): ApplicationAuth {
 private class JWTTokens(
     val audience: String,
     val issuer: String,
-    val secret: String
+    secret: String
 ) {
 
     private val algorithm = Algorithm.HMAC256(secret)
@@ -142,17 +145,18 @@ private class JWTTokens(
         val refreshToken = refreshTokenVerifier.verify(token.refreshToken)
         val tokenValidAndExpired = try {
             tokenVerifier.verify(token.token)
+            LOGGER.trace("The token is still Valid and cannot be refreshed")
             null
         } catch (_: TokenExpiredException) {
             refreshToken
         }
 
-        if (tokenValidAndExpired == null) throw Exception("Invalid Token to refresh")
+        if (tokenValidAndExpired == null) throw HttpStatusException("Invalid Token to refresh", HttpStatusCode.Forbidden)
         val newPayload = tokenValidAndExpired.claims.map { it.key to it.value }.toMap()
         val newToken = JWT.create()
             .withSubject(tokenValidAndExpired.subject)
             .withIssuer(tokenValidAndExpired.issuer)
-            .withAudience(*tokenValidAndExpired.audience.toTypedArray())
+            .withAudience(audience)
             .withExpiresAt(fromNow(10.minutes).toJavaInstant())
             .sign(algorithm)
         return Token(newToken, createRefreshToken(tokenValidAndExpired.subject))
