@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="ApplicationKt" type="KtorApplicationConfigurationType" factoryName="Ktor" nameIsGenerated="true">
     <option name="MAIN_CLASS_NAME" value="ch.pc.klbx.demo.ApplicationKt" />
-    <module name="demo.server.main" />
+    <module name="klbx.server.main" />
     <option name="PROGRAM_PARAMETERS" value="--env dev" />
     <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
       <option name="credential" />
@@ -16,7 +16,7 @@
     <option name="programParameters" value="--env dev" />
     <option name="shortenCommandLine" />
     <option name="vmParameters" />
-    <option name="workingDirectory" value="C:\Users\patri\IdeaProjects\demo" />
+    <option name="workingDirectory" value="C:\Users\patri\IdeaProjects\klbx" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

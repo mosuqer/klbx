@@ -6,6 +6,7 @@ plugins {
 }
 
 kotlin {
+    println(this.javaClass.classes.joinToString(", ") { it.name })
     jvm()
 
     js {
@@ -21,6 +22,7 @@ kotlin {
         commonMain.dependencies {
             // put your Multiplatform dependencies here
             api(libs.serialization.json)
+            api(libs.kotlin.datetime)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

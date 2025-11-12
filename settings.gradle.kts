@@ -1,4 +1,4 @@
-rootProject.name = "demo"
+rootProject.name = "klbx"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {

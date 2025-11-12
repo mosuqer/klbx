@@ -13,6 +13,12 @@ application {
     val isDevelopment: Boolean = project.ext.has("development")
 }
 
+kotlin {
+    compilerOptions {
+        optIn.add("kotlin.time.ExperimentalTime")
+    }
+}
+
 dependencies {
     implementation(projects.shared)
     implementation(libs.logback)

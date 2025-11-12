@@ -10,6 +10,7 @@ logback = "1.5.21"
 serialization = "1.9.0"
 version-catalog-update = "1.0.1"
 commandline = "1.0.0"
+kotlin-datetime = "0.7.1"
 
 [libraries]
 androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
@@ -25,6 +26,9 @@ ktor-serverAuth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor" }
 ktor-serverAuthJwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor" }
 ktor-serverContentNegotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
 ktor-serverJson = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+
+
+kotlin-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlin-datetime" }
 
 ktor-clientCio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktor-clientCore = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
