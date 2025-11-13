@@ -11,6 +11,7 @@ serialization = "1.9.0"
 version-catalog-update = "1.0.1"
 commandline = "1.0.0"
 kotlin-datetime = "0.7.1"
+androidPlugin = "8.13.0"
 
 [libraries]
 androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
@@ -51,6 +52,7 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 versionCatalogUpdate = { id = "nl.littlerobots.version-catalog-update", version.ref = "version-catalog-update" }
+androidLibrary = { id = "com.android.library", version.ref = "androidPlugin" }
 
 [bundles]
 ktor-client = [
