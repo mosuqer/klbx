@@ -19,19 +19,24 @@ junit = { module = "junit:junit", version.ref = "junit" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 kotlinx-coroutinesSwing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+
+ktor-jsonSerialization = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+
 ktor-serverCore = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }
 ktor-serverNetty = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "ktor" }
 ktor-serverTestHost = { module = "io.ktor:ktor-server-test-host-jvm", version.ref = "ktor" }
 ktor-serverAuth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor" }
 ktor-serverAuthJwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor" }
 ktor-serverContentNegotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
-ktor-serverJson = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
-
-
-kotlin-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlin-datetime" }
 
 ktor-clientCio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktor-clientCore = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-clientContentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-clientAuth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
+
+kotlin-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlin-datetime" }
+
+
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 
@@ -51,7 +56,10 @@ versionCatalogUpdate = { id = "nl.littlerobots.version-catalog-update", version.
 ktor-client = [
     "ktor-clientCio",
     "ktor-clientCore",
+    "ktor-clientContentNegotiation",
+    "ktor-jsonSerialization",
+    "ktor-clientAuth"
 ]
 ktor-server = [
-    "ktor-serverAuth", "ktor-serverAuthJwt", "ktor-serverCore", "ktor-serverNetty", "ktor-serverContentNegotiation", "ktor-serverJson"
+    "ktor-serverAuth", "ktor-serverAuthJwt", "ktor-serverCore", "ktor-serverNetty", "ktor-serverContentNegotiation", "ktor-jsonSerialization"
 ]

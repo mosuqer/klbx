@@ -1,6 +1,11 @@
 package ch.pc.klbx.demo
 
+import ch.pc.klbx.ApplicationRoles
+import ch.pc.klbx.ErrorCode
 import ch.pc.klbx.auth.LoginData
+import ch.pc.klbx.auth.LoginResult
+import ch.pc.klbx.encode
+import ch.pc.klbx.shared.TokenPair
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.TokenExpiredException
@@ -17,8 +22,8 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import io.ktor.util.logging.KtorSimpleLogger
-import io.ktor.util.logging.Logger
 import kotlinx.serialization.Serializable
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaInstant
@@ -29,13 +34,7 @@ import kotlin.time.toJavaInstant
 
 
 private val jwtAuth = "jwtAuth"
-private val  LOGGER = KtorSimpleLogger("ch.pc.klbx.demo.Authentication")
-
-@Serializable
-data class Token(
-    val token: String,
-    val refreshToken: String
-)
+private val LOGGER = KtorSimpleLogger("ch.pc.klbx.demo.Authentication")
 
 data class ApplicationAuth(private val realm: String) {
 
@@ -75,13 +74,16 @@ fun Application.installAuthentication(): ApplicationAuth {
         post("/login") {
             val user = call.receive<LoginData>()
             // Check username and password
-            if (user.username != user.password) throw Exception("Invalid username or password")
+            if (user.username != user.password) throw HttpStatusException.Forbidden(
+                "Invalid username or password",
+                ErrorCode.LoginDenied
+            )
 
             call.respond(HttpStatusCode.OK, jwt.createTokenResponse(user.username))
         }
 
         post("/refresh") {
-            val body = call.receive<Token>()
+            val body = call.receive<TokenPair>()
             call.respond(jwt.createNewToken(body))
         }
     }
@@ -108,58 +110,57 @@ private class JWTTokens(
 
     fun createTokenResponse(
         username: String,
-    ): Token {
-        val roles = when(username) {
-            "admin" -> mapOf("ROLE_ADMIN" to true)
-            else -> mapOf("ROLE_USER" to true)
-        }
-        val token = JWT.create()
-            .withAudience(audience)
-            .withIssuer(issuer)
-            .withExpiresAt(fromNow(1.seconds).toJavaInstant())
-            .withSubject(username)
-            .withPayload(roles)
-            .sign(algorithm)
-        val refreshToken = createRefreshToken(username)
-        val toenResponse = Token(token, refreshToken)
-        return toenResponse
+    ): LoginResult {
+        return LoginResult(
+            token = createJwtToken(username),
+            refreshToken = createJwtToken(username, isRefreshToken = true),
+            success = true
+        )
     }
 
-    private fun createRefreshToken(username: String): String {
-        val roles = when(username) {
-            "admin" -> mapOf("ROLE_ADMIN" to true)
-            else -> mapOf("ROLE_USER" to true)
-        }
+    fun createNewToken(token: TokenPair): LoginResult {
+        // THE REFRESH TOKEN MUST BE VALID!!
+        refreshTokenVerifier.verify(token.refreshToken)
 
-        val refreshToken = JWT.create()
-            .withAudience(audience + "refresh")
-            .withIssuer(issuer)
-            .withSubject(username)
-            .withPayload(roles)
-            .withExpiresAt(fromNow(30.minutes).toJavaInstant())
-            .sign(algorithm)
-        return refreshToken
-    }
 
-    fun createNewToken(token: Token): Token {
-        val refreshToken = refreshTokenVerifier.verify(token.refreshToken)
+        val jwt = JWT.decode(token.token)
         val tokenValidAndExpired = try {
-            tokenVerifier.verify(token.token)
-            LOGGER.trace("The token is still Valid and cannot be refreshed")
+            tokenVerifier.verify(jwt)
             null
         } catch (_: TokenExpiredException) {
-            refreshToken
+            jwt
         }
 
-        if (tokenValidAndExpired == null) throw HttpStatusException("Invalid Token to refresh", HttpStatusCode.Forbidden)
-        val newPayload = tokenValidAndExpired.claims.map { it.key to it.value }.toMap()
+        if (tokenValidAndExpired == null) throw HttpStatusException.Forbidden(
+            "Invalid Token to refresh",
+            ErrorCode.InvalidToken
+        )
+        val roles = tokenValidAndExpired.getClaim("roles").asList(String::class.java)
+
         val newToken = JWT.create()
             .withSubject(tokenValidAndExpired.subject)
             .withIssuer(tokenValidAndExpired.issuer)
+            .withClaim("roles", roles)
             .withAudience(audience)
             .withExpiresAt(fromNow(10.minutes).toJavaInstant())
             .sign(algorithm)
-        return Token(newToken, createRefreshToken(tokenValidAndExpired.subject))
+        return LoginResult(newToken, createJwtToken(tokenValidAndExpired.subject, isRefreshToken = true), true)
+    }
+
+    private fun createJwtToken(username: String, isRefreshToken: Boolean = false, expireIn: Duration? = null): String {
+        val roles = when (username) {
+            "admin" -> listOf(ApplicationRoles.ADMIN)
+            else -> listOf(ApplicationRoles.USER)
+        }.encode()
+
+        val refreshToken = JWT.create()
+            .withAudience(audience + if (isRefreshToken) "refresh" else "")
+            .withIssuer(issuer)
+            .withSubject(username)
+            .withClaim("roles", roles)
+            .withExpiresAt(fromNow(expireIn ?: if (isRefreshToken) 30.minutes else 1.seconds).toJavaInstant())
+            .sign(algorithm)
+        return refreshToken
     }
 
 }
